@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kerala Female Delusion Calculator</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1><i class="fas fa-calculator"></i> Kerala Female Delusion Calculator</h1>
+            <p class="subtitle">Based on 2011 Census Data & Government Statistics</p>
+            <div class="stats-banner">
+                <div class="stat-item">
+                    <span class="stat-number">59,10,264</span>
+                    <span class="stat-label">Total Men (Age 20-44)</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">1,084</span>
+                    <span class="stat-label">Females per 1,000 Males</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">96.11%</span>
+                    <span class="stat-label">Male Literacy Rate</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Calculator Form -->
+        <main class="calculator-container">
+            <div class="form-section">
+                <h2><i class="fas fa-sliders-h"></i> Set Your Preferences</h2>
+                
+                <!-- Age Preference -->
+                <div class="criteria-group">
+                    <label class="criteria-label">
+                        <i class="fas fa-birthday-cake"></i> Age Range Preference
+                        <span class="info-icon" data-tooltip="Select preferred age range for potential partners">?</span>
+                    </label>
+                    <div class="checkbox-group" id="age-group">
+                        <label><input type="checkbox" value="20-24" data-percentage="21.98"> 20-24 years</label>
+                        <label><input type="checkbox" value="25-29" data-percentage="20.38"> 25-29 years</label>
+                        <label><input type="checkbox" value="30-34" data-percentage="19.09"> 30-34 years</label>
+                        <label><input type="checkbox" value="35-39" data-percentage="19.66"> 35-39 years</label>
+                        <label><input type="checkbox" value="40-44" data-percentage="18.91"> 40-44 years</label>
+                    </div>
+                </div>
+
+                <!-- Height Preference -->
+                <div class="criteria-group">
+                    <label class="criteria-label">
+                        <i class="fas fa-ruler-vertical"></i> Minimum Height
+                        <span class="info-icon" data-tooltip="Height requirements significantly reduce available pool">?</span>
+                    </label>
+                    <select id="height-select" class="select-dropdown">
+                        <option value="100">Any Height (100%)</option>
+                        <option value="85">5'4" and above (85%)</option>
+                        <option value="50">5'6" and above (50%)</option>
+                        <option value="20">5'8" and above (20%)</option>
+                        <option value="5">5'10" and above (5%)</option>
+                        <option value="1">6'0" and above (1%)</option>
+                    </select>
+                </div>
+
+                <!-- Education Preference -->
+                <div class="criteria-group">
+                    <label class="criteria-label">
+                        <i class="fas fa-graduation-cap"></i> Minimum Education Level
+                        <span class="info-icon" data-tooltip="Kerala has highest literacy rate in India">?</span>
+                    </label>
+                    <select id="education-select" class="select-dropdown">
+                        <option value="100">Any Education (100%)</option>
+                        <option value="95">Primary and above (95%)</option>
+                        <option value="75">Secondary and above (75%)</option>
+                        <option value="50">Higher Secondary and above (50%)</option>
+                        <option value="30">Graduate and above (30%)</option>
+                        <option value="8">Post Graduate and above (8%)</option>
+                        <option value="2">Professional degree (2%)</option>
+                    </select>
+                </div>
+
+                <!-- Income Preference -->
+                <div class="criteria-group">
+                    <label class="criteria-label">
+                        <i class="fas fa-rupee-sign"></i> Minimum Monthly Income
+                        <span class="info-icon" data-tooltip="Income expectations are major limiting factors">?</span>
+                    </label>
+                    <select id="income-select" class="select-dropdown">
+                        <option value="100">Any Income (100%)</option>
+                        <option value="65">₹10,000 and above (65%)</option>
+                        <option value="40">₹20,000 and above (40%)</option>
+                        <option value="20">₹35,000 and above (20%)</option>
+                        <option value="8">₹50,000 and above (8%)</option>
+                        <option value="3">₹75,000 and above (3%)</option>
+                        <option value="1">₹1,00,000 and above (1%)</option>
+                    </select>
+                </div>
+
+                <!-- Employment Status -->
+                <div class="criteria-group">
+                    <label class="criteria-label">
+                        <i class="fas fa-briefcase"></i> Employment Status
+                        <span class="info-icon" data-tooltip="Select preferred employment types">?</span>
+                    </label>
+                    <div class="checkbox-group" id="employment-group">
+                        <label><input type="checkbox" value="government" data-percentage="8"> Government Job (8%)</label>
+                        <label><input type="checkbox" value="private" data-percentage="25"> Private Sector (25%)</label>
+                        <label><input type="checkbox" value="business" data-percentage="15"> Self Employed/Business (15%)</label>
+                        <label><input type="checkbox" value="professional" data-percentage="5"> Professional/Freelancer (5%)</label>
+                    </div>
+                </div>
+
+                <!-- Religion -->
+                <div class="criteria-group">
+                    <label class="criteria-label">
+                        <i class="fas fa-om"></i> Religion
+                        <span class="info-icon" data-tooltip="Kerala is religiously diverse">?</span>
+                    </label>
+                    <div class="checkbox-group" id="religion-group">
+                        <label><input type="checkbox" value="hindu" data-percentage="55"> Hindu (55%)</label>
+                        <label><input type="checkbox" value="muslim" data-percentage="26"> Muslim (26%)</label>
+                        <label><input type="checkbox" value="christian" data-percentage="18"> Christian (18%)</label>
+                        <label><input type="checkbox" value="others" data-percentage="1"> Others (1%)</label>
+                    </div>
+                </div>
+
+                <!-- Body Type -->
+                <div class="criteria-group">
+                    <label class="criteria-label">
+                        <i class="fas fa-male"></i> Body Type
+                        <span class="info-icon" data-tooltip="Physical preferences">?</span>
+                    </label>
+                    <div class="checkbox-group" id="bodytype-group">
+                        <label><input type="checkbox" value="slim" data-percentage="25"> Slim (25%)</label>
+                        <label><input type="checkbox" value="average" data-percentage="45"> Average (45%)</label>
+                        <label><input type="checkbox" value="athletic" data-percentage="15"> Athletic (15%)</label>
+                        <label><input type="checkbox" value="heavy" data-percentage="12"> Heavy (12%)</label>
+                    </div>
+                </div>
+
+                <!-- Marital Status -->
+                <div class="criteria-group">
+                    <label class="criteria-label">
+                        <i class="fas fa-heart"></i> Marital Status
+                        <span class="info-icon" data-tooltip="Availability status">?</span>
+                    </label>
+                    <div class="checkbox-group" id="marital-group">
+                        <label><input type="checkbox" value="never-married" data-percentage="45"> Never Married (45%)</label>
+                        <label><input type="checkbox" value="divorced" data-percentage="4"> Divorced (4%)</label>
+                    </div>
+                </div>
+
+                <!-- Location -->
+                <div class="criteria-group">
+                    <label class="criteria-label">
+                        <i class="fas fa-map-marker-alt"></i> Location Preference
+                        <span class="info-icon" data-tooltip="Urban vs Rural preference">?</span>
+                    </label>
+                    <div class="checkbox-group" id="location-group">
+                        <label><input type="checkbox" value="urban" data-percentage="48"> Urban Areas (48%)</label>
+                        <label><input type="checkbox" value="rural" data-percentage="52"> Rural Areas (52%)</label>
+                    </div>
+                </div>
+
+                <!-- Lifestyle -->
+                <div class="criteria-group">
+                    <label class="criteria-label">
+                        <i class="fas fa-leaf"></i> Lifestyle Preferences
+                        <span class="info-icon" data-tooltip="Lifestyle compatibility factors">?</span>
+                    </label>
+                    <div class="checkbox-group" id="lifestyle-group">
+                        <label><input type="checkbox" value="non-smoker" data-percentage="85"> Non-Smoker (85%)</label>
+                        <label><input type="checkbox" value="non-drinker" data-percentage="60"> Non-Drinker (60%)</label>
+                        <label><input type="checkbox" value="vegetarian" data-percentage="25"> Vegetarian (25%)</label>
+                        <label><input type="checkbox" value="fitness" data-percentage="30"> Fitness Conscious (30%)</label>
+                    </div>
+                </div>
+
+                <!-- Calculate Button -->
+                <div class="calculate-section">
+                    <button id="calculate-btn" class="calculate-button">
+                        <i class="fas fa-calculator"></i> Calculate My Reality Check
+                    </button>
+                    <button id="reset-btn" class="reset-button">
+                        <i class="fas fa-redo"></i> Reset All
+                    </button>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div class="results-section" id="results-section" style="display: none;">
+                <h2><i class="fas fa-chart-bar"></i> Your Results</h2>
+                
+                <div class="result-card main-result">
+                    <div class="result-icon">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    <div class="result-content">
+                        <h3>Match Percentage</h3>
+                        <div class="percentage-display" id="match-percentage">0%</div>
+                        <div class="count-display" id="match-count">0 men</div>
+                    </div>
+                </div>
+
+                <div class="reality-check" id="reality-check">
+                    <div class="reality-indicator" id="reality-indicator">
+                        <i class="fas fa-question-circle"></i>
+                        <span id="reality-text">Calculate to see reality check</span>
+                    </div>
+                </div>
+
+                <div class="selected-criteria" id="selected-criteria">
+                    <h3>Selected Criteria:</h3>
+                    <div id="criteria-list"></div>
+                </div>
+
+                <!-- Chart Placeholder -->
+                <div class="chart-container">
+                    <canvas id="resultsChart" width="400" height="200"></canvas>
+                </div>
+
+                <!-- Share Section -->
+                <div class="share-section">
+                    <button class="share-button" id="share-btn">
+                        <i class="fas fa-share-alt"></i> Share Results
+                    </button>
+                    <button class="export-button" id="export-btn">
+                        <i class="fas fa-download"></i> Export as Image
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="disclaimer">
+                <h3><i class="fas fa-info-circle"></i> Disclaimer</h3>
+                <p>This calculator is for educational and self-reflection purposes only. Real relationships involve many factors beyond demographics. The goal is to provide perspective on statistical realities, not to dictate who you should date.</p>
+            </div>
+            <div class="data-sources">
+                <h3><i class="fas fa-database"></i> Data Sources</h3>
+                <ul>
+                    <li>Census of India 2011 - Kerala State Data</li>
+                    <li>Kerala State Planning Board Economic Reviews</li>
+                    <li>National Sample Survey Office (NSSO) Employment Data</li>
+                    <li>Government of India Socio-Economic Surveys</li>
+                </ul>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Tooltip -->
+    <div id="tooltip" class="tooltip"></div>
+
+    <!-- Scripts -->
+    <script src="kerala-data.js"></script>
+    <script src="script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</body>
+</html>
