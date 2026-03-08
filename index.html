@@ -893,7 +893,7 @@
 
         <div class="sharerow">
           <button class="btn-share"  onclick="shareResults()">📤 Share Results</button>
-          <button class="btn-export" onclick="exportImage()">⬇ Export</button>
+          <button class="btn-export" onclick="exportImage()">📸 Export PNG</button>
         </div>
       </div>
     </div><!-- /col 3 -->
@@ -917,6 +917,8 @@
   </footer>
 
 </div><!-- /shell -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <script>
 /* ═══════════════════════════════════════════════════════════
@@ -1209,8 +1211,70 @@ function shareResults() {
   }
 }
 
+// ═══════════════════════════════════════════════════════════
+//  EXPORT AS PNG
+//  Uses html2canvas to render the results panel into a canvas,
+//  then converts that canvas to a PNG data URL and triggers a
+//  browser download — no server, no permissions, no popups.
+// ═══════════════════════════════════════════════════════════
 function exportImage() {
-  flash("Tip: Press Ctrl+Shift+S (Win) or Cmd+Shift+4 (Mac) to screenshot your results.");
+  const target = document.getElementById("rcol");
+
+  // Guard: make sure a calculation has actually been run first,
+  // so we don't export a blank "Awaiting calibration…" card.
+  const pctText = document.getElementById("mpct").textContent;
+  if (pctText === "–") {
+    flash("Run 👑 Build My Prince first, then export your result.");
+    return;
+  }
+
+  flash("📸 Capturing your result…");
+
+  // html2canvas works best when backdrop-filter blur is removed
+  // temporarily, because it cannot composite blur across layers.
+  // We store the original value, clear it, capture, then restore.
+  const originalFilter = target.style.backdropFilter;
+  target.style.backdropFilter = "none";
+  // Also temporarily boost the card background opacity so the
+  // dark surface looks solid in the exported image.
+  target.style.background = "rgba(7, 7, 32, 0.98)";
+
+  html2canvas(target, {
+    backgroundColor: "#020210",   // match the page background colour
+    scale: 2,                     // 2× pixel density → crisp on retina / high-DPI screens
+    useCORS: true,                // allow cross-origin resources (fonts, logo)
+    logging: false,               // suppress console noise
+    // Ignore the starfield canvas behind the page — we only want the card
+    ignoreElements: (el) => el.id === "stars",
+  }).then(canvas => {
+
+    // Restore the original styles before the user sees anything change
+    target.style.backdropFilter = originalFilter;
+    target.style.background     = "";
+
+    // Convert the canvas to a PNG blob URL and trigger a download.
+    // The filename includes the match % so exported files are
+    // self-describing when saved to disk.
+    canvas.toBlob(blob => {
+      const url      = URL.createObjectURL(blob);
+      const link     = document.createElement("a");
+      link.href      = url;
+      link.download  = `kerala-prince-result-${pctText.replace("%","pct")}.png`;
+      link.click();
+
+      // Clean up the object URL after a short delay to free memory
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+
+      flash("✅ PNG saved!");
+    }, "image/png");
+
+  }).catch(err => {
+    // Restore styles even if something went wrong
+    target.style.backdropFilter = originalFilter;
+    target.style.background     = "";
+    console.error("Export error:", err);
+    flash("Export failed — try a screenshot instead (Ctrl+Shift+S).");
+  });
 }
 
 /* ═══════════════════════════════════════════════════════════
