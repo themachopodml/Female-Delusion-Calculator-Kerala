@@ -1,258 +1,143 @@
-# Kerala Female Delusion Calculator - Web Application Guide
+# Deployment Guide
+## Kerala Female Delusion Calculator — by @themachopodml
 
-## Quick Start Instructions
+---
 
-### Option 1: Simple Local Development
-1. **Download Files**: Save all 4 files (`index.html`, `styles.css`, `kerala-data.js`, `script.js`) in the same folder
-2. **Open in Browser**: Double-click `index.html` to open in your web browser
-3. **Test Locally**: The calculator should work immediately without any server setup
+## How the Project is Structured
 
-### Option 2: Live Web Hosting (Recommended)
+The calculator is intentionally split into four separate files, each with a single responsibility. Understanding why this matters makes maintaining the project much easier over time.
 
-#### Using GitHub Pages (Free)
-1. **Create GitHub Repository**:
-   - Go to GitHub.com and create a new repository
-   - Name it something like `kerala-delusion-calculator`
-   - Make it public
+`index.html` is the skeleton — it defines the page structure (header, three columns, footer) and the HTML of every card, checkbox, dropdown, and button. It does not contain any styles, data, or logic directly. It loads the other files in the correct order.
 
-2. **Upload Files**:
-   - Upload all 4 files to the repository
-   - Commit with message "Initial calculator setup"
+`styles.css` handles all visual rules — colours, fonts, spacing, animations, layout. If you want to change how something *looks*, this is the only file you ever need to touch.
 
-3. **Enable GitHub Pages**:
-   - Go to Settings → Pages
-   - Select "Deploy from a branch" → "main"
-   - Your site will be live at: `https://yourusername.github.io/kerala-delusion-calculator`
+`kerala-data.js` holds only static data constants — the `H_DATA` height table, the `CAT_RATING_TIERS` scarcity tiers, and the `TOTAL_MEN` population base. If a new census is released or you want to update a percentage, this is the only file you change. Nothing in `script.js` or `index.html` needs to be touched.
 
-#### Using Netlify (Free)
-1. **Drag & Drop Deployment**:
-   - Go to netlify.com
-   - Create account (free)
-   - Drag your folder with all files to the deploy area
-   - Get instant live URL
+`script.js` contains all the application logic — the calculation engine, animation, PNG export, share feature, and the starfield animation. It reads from `kerala-data.js` but never writes to it.
 
-#### Using Vercel (Free)
-1. **Import Project**:
-   - Go to vercel.com
-   - Connect GitHub account
-   - Import your repository
-   - Automatic deployment with custom domain
+---
 
-## Technology Stack Used
+## The Correct Load Order in index.html
 
-### Frontend Technologies
-- **HTML5**: Semantic markup with accessibility features
-- **CSS3**: Modern styling with gradients, flexbox, and grid
-- **Vanilla JavaScript**: No frameworks for maximum compatibility
-- **Chart.js**: Data visualization library (loaded via CDN)
-- **Font Awesome**: Icons library (loaded via CDN)
+The files must be loaded in a specific order because each one depends on the previous. In your `<head>` section:
 
-### Key Features Implemented
-
-#### User Interface
-- ✅ Responsive design (mobile-friendly)
-- ✅ Interactive form with multiple input types
-- ✅ Real-time tooltips for guidance
-- ✅ Animated results display
-- ✅ Professional styling with gradients
-
-#### Calculator Logic
-- ✅ Multiple criteria selection (age, height, income, etc.)
-- ✅ Realistic percentage calculations
-- ✅ Reality check system with 5 levels
-- ✅ Population count estimates
-- ✅ Chart visualization of results
-
-#### Advanced Features
-- ✅ Share results functionality
-- ✅ Export results capability
-- ✅ Form reset with confirmation
-- ✅ Keyboard shortcuts (Ctrl+Enter to calculate)
-- ✅ Loading states and error handling
-- ✅ Analytics tracking placeholder
-
-## Customization Options
-
-### 1. Add More Criteria
-```javascript
-// In kerala-data.js, add new categories:
-KERALA_DATA.NEW_CATEGORY = {
-    'option1': 25,
-    'option2': 30,
-    // etc.
-};
-```
-
-### 2. Modify Styling
-```css
-/* In styles.css, customize colors: */
-:root {
-    --primary-color: #your-color;
-    --secondary-color: #your-color;
-}
-```
-
-### 3. Add Analytics
-```javascript
-// In script.js, uncomment and configure:
-function trackEvent(eventName, eventData) {
-    gtag('event', eventName, eventData); // Google Analytics
-    fbq('track', eventName, eventData);  // Facebook Pixel
-}
-```
-
-## Advanced Features to Add
-
-### Backend Integration (Optional)
-```javascript
-// Add to script.js for database storage:
-async function saveResults(results) {
-    await fetch('/api/save-result', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(results)
-    });
-}
-```
-
-### Social Media Integration
 ```html
-<!-- Add to index.html head section: -->
-<meta property="og:title" content="Kerala Female Delusion Calculator">
-<meta property="og:description" content="Check realistic dating expectations">
-<meta property="og:image" content="preview-image.png">
+<!-- 1. Google Fonts — loaded first so the rest of the page can use them -->
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Exo+2:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- 2. Stylesheet — loaded before any JS so the page renders styled on first paint -->
+<link rel="stylesheet" href="styles.css">
+
+<!-- 3. html2canvas — must be available before script.js runs exportImage() -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 ```
 
-### Progressive Web App (PWA)
+And just before your closing `</body>` tag:
+
 ```html
-<!-- Add to index.html head: -->
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#667eea">
+<!-- 4. Data constants — must be loaded before script.js so TOTAL_MEN, H_DATA,
+        and CAT_RATING_TIERS are defined when script.js references them -->
+<script src="kerala-data.js"></script>
+
+<!-- 5. Application logic — loaded last because it depends on everything above -->
+<script src="script.js"></script>
 ```
 
-## Performance Optimizations
+If you accidentally load `script.js` before `kerala-data.js`, the browser will throw a `ReferenceError: TOTAL_MEN is not defined` error the moment the user clicks Build My Prince. Load order is not optional.
 
-### 1. Image Optimization
-- Add lazy loading for images
-- Compress chart images
-- Use WebP format where supported
+---
 
-### 2. JavaScript Optimization
-- Minify JavaScript files
-- Add service worker for caching
-- Implement code splitting for large features
+## Deploying to GitHub Pages (Browser Method — No Git Required)
 
-### 3. CSS Optimization
-- Use CSS custom properties for theming
-- Implement critical CSS loading
-- Add print styles
+This is the simplest approach and requires no software installation.
 
-## SEO and Marketing
+**Step 1 — Go to your repository.** Open `https://github.com/themachopodml/Female-Delusion-Calculator-Kerala` in your browser.
 
-### Meta Tags (Add to HTML head)
-```html
-<meta name="description" content="Kerala Female Delusion Calculator - Check realistic dating expectations based on 2011 census data">
-<meta name="keywords" content="kerala, dating, calculator, census, statistics">
-<meta name="author" content="Your Name">
+**Step 2 — Upload the new files.** Click the **Add file** button near the top right of the file list, then choose **Upload files**. Drag all five files — `index.html`, `styles.css`, `kerala-data.js`, `script.js`, and `deployment-guide.md` — into the upload area at once. You can also update them one at a time by clicking on the filename, clicking the pencil icon, selecting all with `Ctrl+A`, deleting, pasting the new content, and clicking **Commit changes**.
+
+**Step 3 — Commit the upload.** Scroll down to the **Commit changes** section. Type a brief message like `Split into separate CSS and JS files`. Leave the radio button on "Commit directly to the main branch" and click **Commit changes**.
+
+**Step 4 — Wait for GitHub Pages to rebuild.** GitHub Pages takes 1–3 minutes to detect the change and rebuild the site. You can watch the progress by clicking the **Actions** tab in your repository — a green tick means the deployment is complete.
+
+**Step 5 — Hard-refresh the live site.** Visit `https://themachopodml.github.io/Female-Delusion-Calculator-Kerala/` and press `Ctrl+Shift+R` (Windows/Linux) or `Cmd+Shift+R` (Mac) to force your browser to discard its cached version and load the new files fresh. This step is easy to forget and causes confusion when the old version appears to still be showing.
+
+---
+
+## Deploying with Git (Command Line Method)
+
+If you have Git installed and a local copy of the repository, this is faster for bulk updates.
+
+```bash
+# Navigate to your local repo folder
+cd Female-Delusion-Calculator-Kerala
+
+# Copy the new files into the repo folder (adjust paths as needed)
+cp ~/Downloads/index.html .
+cp ~/Downloads/styles.css .
+cp ~/Downloads/kerala-data.js .
+cp ~/Downloads/script.js .
+
+# Stage all changes
+git add .
+
+# Commit with a descriptive message
+git commit -m "Refactor: separate CSS, data, and logic into individual files"
+
+# Push to GitHub — Pages will rebuild automatically
+git push origin main
 ```
 
-### Schema Markup
-```html
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebApplication",
-  "name": "Kerala Female Delusion Calculator",
-  "description": "Dating expectation calculator based on Kerala census data"
-}
-</script>
+---
+
+## Updating Census Data in the Future
+
+When a new census or NSSO survey is published, the workflow is:
+
+1. Open `kerala-data.js` only.
+2. Find the relevant percentage (for example, the `pct` value for a height threshold, or the `above` threshold for a rating tier).
+3. Update the number.
+4. Commit and deploy as described above.
+
+You do not need to touch `index.html`, `styles.css`, or `script.js` at all. This is the main benefit of separating the data layer — future maintainers know exactly where to look.
+
+---
+
+## Testing Locally Before Deploying
+
+Because the calculator now loads external files via `<script src="...">`, you cannot open `index.html` by double-clicking it in your file manager. Browsers block local file loading for security reasons (the CORS policy). You need a local web server instead. The easiest way with no installation is Python's built-in server:
+
+```bash
+# In the repo folder:
+python3 -m http.server 8080
 ```
 
-## Security Considerations
+Then open `http://localhost:8080` in your browser. Every time you save a change to any file, just refresh the tab to see it.
 
-### 1. Input Validation
-```javascript
-// Add to script.js:
-function validateInput(value, type) {
-    switch(type) {
-        case 'percentage':
-            return value >= 0 && value <= 100;
-        case 'age':
-            return value >= 18 && value <= 100;
-    }
-}
-```
+---
 
-### 2. Content Security Policy
-```html
-<!-- Add to index.html head: -->
-<meta http-equiv="Content-Security-Policy" 
-      content="default-src 'self'; script-src 'self' 'unsafe-inline' cdn.jsdelivr.net cdnjs.cloudflare.com;">
-```
+## Troubleshooting Common Issues
 
-## Testing Checklist
+**The page shows the old version after deploying.** This is almost always a browser cache issue. Press `Ctrl+Shift+R` (or `Cmd+Shift+R` on Mac) for a hard refresh. If the issue persists, open DevTools (`F12`), go to the Network tab, tick **Disable cache**, and reload.
 
-### Browser Compatibility
-- ✅ Chrome/Edge (latest)
-- ✅ Firefox (latest)  
-- ✅ Safari (latest)
-- ✅ Mobile browsers
+**"Build My Prince" does nothing and no error appears.** Open DevTools (`F12`), click the Console tab, and look for red error messages. The most common cause is a file missing from the repository — typically `kerala-data.js` or `script.js` not being uploaded. Check that all files appear in the GitHub file list.
 
-### Functionality Tests
-- ✅ All form inputs work correctly
-- ✅ Calculations are accurate
-- ✅ Charts display properly
-- ✅ Share/export functions work
-- ✅ Responsive design on all devices
+**The PNG export button produces a blank or black image.** This usually means html2canvas could not load the logo image because of a CORS restriction. Make sure the CDN link for html2canvas in `index.html` is present and matches exactly: `https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js`.
 
-### Performance Tests
-- ✅ Page loads in under 3 seconds
-- ✅ Interactive elements respond quickly
-- ✅ No JavaScript errors in console
-- ✅ Accessible via keyboard navigation
+**The page layout looks broken on first load.** This means `styles.css` is either missing or loaded after the HTML renders. Check that the `<link rel="stylesheet" href="styles.css">` tag is inside the `<head>` section of `index.html`, not at the bottom of `<body>`.
 
-## Deployment Checklist
+---
 
-### Pre-Deployment
-- [ ] Test all functionality locally
-- [ ] Optimize images and assets
-- [ ] Minify CSS and JavaScript
-- [ ] Add analytics tracking
-- [ ] Set up custom domain (optional)
+## File Checklist for Each Deployment
 
-### Post-Deployment
-- [ ] Test live site functionality
-- [ ] Submit to search engines
-- [ ] Set up monitoring/analytics
-- [ ] Create social media previews
-- [ ] Document any issues
+Before pushing, confirm all of the following files are present and up to date in the repository:
 
-## Maintenance and Updates
+- `index.html` — page structure and HTML markup
+- `styles.css` — all visual rules
+- `kerala-data.js` — population base, height table, rating tiers
+- `script.js` — calculator logic, animation, export, sharing
+- `README.md` — project documentation
+- `deployment-guide.md` — this file
 
-### Regular Updates
-- Update Kerala demographic data as new census data becomes available
-- Monitor user feedback and add requested features
-- Keep dependencies (Chart.js, Font Awesome) updated
-- Review and update reality check thresholds based on user feedback
+---
 
-### Analytics Monitoring
-- Track user engagement metrics
-- Monitor most/least used criteria
-- Analyze drop-off points in the form
-- A/B test different UI elements
-
-## Support and Documentation
-
-### User Documentation
-- Create FAQ section for common questions
-- Add explanatory content about each criterion
-- Provide examples of realistic vs unrealistic expectations
-- Include data sources and methodology
-
-### Technical Documentation
-- Comment all JavaScript functions thoroughly
-- Create API documentation if backend is added
-- Document deployment procedures
-- Maintain changelog for updates
-
-This web application provides a comprehensive, professional tool for the Kerala Female Delusion Calculator with modern web standards, responsive design, and extensible architecture.
+*Kerala Female Delusion Calculator · by @themachopodml · Malappuram, Kerala*
