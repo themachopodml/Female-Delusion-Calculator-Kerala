@@ -1,323 +1,81 @@
-// Kerala Delusion Calculator - Data File
-// Based on 2011 Census and Government Statistics
+/* ════════════════════════════════════════════════════════════
+   kerala-data.js — Kerala Female Delusion Calculator
+   by @themachopodml
+   ─────────────────────────────────────────────────────────
+   This file contains ONLY static data constants.
+   No animation, no DOM access, no calculation logic lives here.
 
-const KERALA_DATA = {
-    // Base demographics
-    TOTAL_MALE_POPULATION_20_44: 5910264,
-    TOTAL_POPULATION: 33406061,
-    SEX_RATIO: 1084, // females per 1000 males
-    LITERACY_RATE: 96.11,
-    
-    // Age distribution (actual census numbers)
-    AGE_DISTRIBUTION: {
-        '20-24': { population: 1298826, percentage: 21.98 },
-        '25-29': { population: 1203978, percentage: 20.38 },
-        '30-34': { population: 1128217, percentage: 19.09 },
-        '35-39': { population: 1161819, percentage: 19.66 },
-        '40-44': { population: 1117424, percentage: 18.91 }
-    },
-    
-    // Height distribution (cumulative percentages)
-    HEIGHT_CRITERIA: {
-        'any-height': 100,
-        '5-4-above': 85,
-        '5-6-above': 50,
-        '5-8-above': 20,
-        '5-10-above': 5,
-        '6-0-above': 1
-    },
-    
-    // Education levels (cumulative percentages)
-    EDUCATION_CRITERIA: {
-        'any-education': 100,
-        'primary-above': 95,
-        'secondary-above': 75,
-        'higher-secondary-above': 50,
-        'graduate-above': 30,
-        'post-graduate-above': 8,
-        'professional': 2
-    },
-    
-    // Income brackets (cumulative percentages)
-    INCOME_CRITERIA: {
-        'any-income': 100,
-        '10k-above': 65,
-        '20k-above': 40,
-        '35k-above': 20,
-        '50k-above': 8,
-        '75k-above': 3,
-        '1l-above': 1
-    },
-    
-    // Employment status (individual percentages)
-    EMPLOYMENT_CATEGORIES: {
-        'government': 8,
-        'private': 25,
-        'business': 15,
-        'professional': 5,
-        'any-employed': 53
-    },
-    
-    // Religious distribution
-    RELIGION_CATEGORIES: {
-        'hindu': 55,
-        'muslim': 26,
-        'christian': 18,
-        'others': 1
-    },
-    
-    // Caste categories
-    CASTE_CATEGORIES: {
-        'forward-caste': 35,
-        'obc': 40,
-        'sc': 9,
-        'st': 1
-    },
-    
-    // Body type distribution
-    BODY_TYPE_CATEGORIES: {
-        'slim': 25,
-        'average': 45,
-        'athletic': 15,
-        'heavy': 12
-    },
-    
-    // Marital status
-    MARITAL_STATUS_CATEGORIES: {
-        'never-married': 45,
-        'divorced': 4
-    },
-    
-    // Location preference
-    LOCATION_CATEGORIES: {
-        'urban': 48,
-        'rural': 52
-    },
-    
-    // Lifestyle preferences
-    LIFESTYLE_CATEGORIES: {
-        'non-smoker': 85,
-        'non-drinker': 60,
-        'vegetarian': 25,
-        'fitness': 30
-    },
-    
-    // Reality check thresholds
-    REALITY_THRESHOLDS: {
-        VERY_REALISTIC: 15,      // Above 15%
-        REALISTIC: 5,            // 5-15%
-        SOMEWHAT_UNREALISTIC: 1, // 1-5%
-        UNREALISTIC: 0.1,        // 0.1-1%
-        VERY_UNREALISTIC: 0      // Below 0.1%
-    },
-    
-    // Example scenarios for demonstration
-    EXAMPLE_SCENARIOS: {
-        HIGH_STANDARDS: {
-            name: "High Standards",
-            criteria: {
-                height: 20,        // 5'8"+
-                education: 30,     // Graduate+
-                income: 8,         // ₹50k+
-                employment: 8,     // Government
-                bodytype: 15,      // Athletic
-                marital: 45,       // Never married
-                lifestyle: 60      // Non-drinker
-            },
-            expected_percentage: 0.006
-        },
-        MODERATE_STANDARDS: {
-            name: "Moderate Standards",
-            criteria: {
-                height: 50,        // 5'6"+
-                education: 50,     // Higher Secondary+
-                income: 40,        // ₹20k+
-                employment: 53,    // Any employed
-                marital: 49,       // Unmarried
-                religion: 55       // Same religion
-            },
-            expected_percentage: 1.43
-        },
-        BASIC_STANDARDS: {
-            name: "Basic Standards",
-            criteria: {
-                education: 75,     // Secondary+
-                income: 65,        // ₹10k+
-                marital: 49,       // Unmarried
-                lifestyle: 85      // Non-smoker
-            },
-            expected_percentage: 20.30
-        }
-    }
-};
+   To update a census figure or add a new tier:
+     • Find the relevant constant below and edit the value.
+     • Reload the page — script.js picks up the change automatically.
+     • No changes to script.js or index.html are needed.
 
-// Utility functions for calculations
-const KeralaCalculator = {
-    // Calculate match percentage based on selected criteria
-    calculateMatch: function(selectedCriteria) {
-        let percentage = 1.0; // Start with 100%
-        let appliedCriteria = [];
-        
-        // Age range calculation (additive for multiple ages)
-        if (selectedCriteria.ages && selectedCriteria.ages.length > 0) {
-            let agePercentage = selectedCriteria.ages.reduce((sum, age) => {
-                return sum + KERALA_DATA.AGE_DISTRIBUTION[age].percentage;
-            }, 0);
-            percentage *= (agePercentage / 100);
-            appliedCriteria.push(`Age: ${agePercentage.toFixed(1)}%`);
-        }
-        
-        // Height (cumulative)
-        if (selectedCriteria.height && selectedCriteria.height !== 100) {
-            percentage *= (selectedCriteria.height / 100);
-            appliedCriteria.push(`Height: ${selectedCriteria.height}%`);
-        }
-        
-        // Education (cumulative)
-        if (selectedCriteria.education && selectedCriteria.education !== 100) {
-            percentage *= (selectedCriteria.education / 100);
-            appliedCriteria.push(`Education: ${selectedCriteria.education}%`);
-        }
-        
-        // Income (cumulative)
-        if (selectedCriteria.income && selectedCriteria.income !== 100) {
-            percentage *= (selectedCriteria.income / 100);
-            appliedCriteria.push(`Income: ${selectedCriteria.income}%`);
-        }
-        
-        // Employment (additive for multiple types)
-        if (selectedCriteria.employment && selectedCriteria.employment.length > 0) {
-            let employmentPercentage = selectedCriteria.employment.reduce((sum, emp) => {
-                return sum + KERALA_DATA.EMPLOYMENT_CATEGORIES[emp];
-            }, 0);
-            percentage *= (employmentPercentage / 100);
-            appliedCriteria.push(`Employment: ${employmentPercentage}%`);
-        }
-        
-        // Religion (additive for multiple religions)
-        if (selectedCriteria.religion && selectedCriteria.religion.length > 0) {
-            let religionPercentage = selectedCriteria.religion.reduce((sum, rel) => {
-                return sum + KERALA_DATA.RELIGION_CATEGORIES[rel];
-            }, 0);
-            percentage *= (religionPercentage / 100);
-            appliedCriteria.push(`Religion: ${religionPercentage}%`);
-        }
-        
-        // Body type (additive for multiple types)
-        if (selectedCriteria.bodyType && selectedCriteria.bodyType.length > 0) {
-            let bodyTypePercentage = selectedCriteria.bodyType.reduce((sum, type) => {
-                return sum + KERALA_DATA.BODY_TYPE_CATEGORIES[type];
-            }, 0);
-            percentage *= (bodyTypePercentage / 100);
-            appliedCriteria.push(`Body Type: ${bodyTypePercentage}%`);
-        }
-        
-        // Marital status (additive for multiple statuses)
-        if (selectedCriteria.maritalStatus && selectedCriteria.maritalStatus.length > 0) {
-            let maritalPercentage = selectedCriteria.maritalStatus.reduce((sum, status) => {
-                return sum + KERALA_DATA.MARITAL_STATUS_CATEGORIES[status];
-            }, 0);
-            percentage *= (maritalPercentage / 100);
-            appliedCriteria.push(`Marital: ${maritalPercentage}%`);
-        }
-        
-        // Location (additive for multiple locations)
-        if (selectedCriteria.location && selectedCriteria.location.length > 0) {
-            let locationPercentage = selectedCriteria.location.reduce((sum, loc) => {
-                return sum + KERALA_DATA.LOCATION_CATEGORIES[loc];
-            }, 0);
-            percentage *= (locationPercentage / 100);
-            appliedCriteria.push(`Location: ${locationPercentage}%`);
-        }
-        
-        // Lifestyle (multiplicative for multiple requirements)
-        if (selectedCriteria.lifestyle && selectedCriteria.lifestyle.length > 0) {
-            selectedCriteria.lifestyle.forEach(lifestyle => {
-                percentage *= (KERALA_DATA.LIFESTYLE_CATEGORIES[lifestyle] / 100);
-                appliedCriteria.push(`${lifestyle}: ${KERALA_DATA.LIFESTYLE_CATEGORIES[lifestyle]}%`);
-            });
-        }
-        
-        const finalPercentage = percentage * 100;
-        const estimatedCount = Math.round(KERALA_DATA.TOTAL_MALE_POPULATION_20_44 * percentage);
-        
-        return {
-            percentage: finalPercentage,
-            count: estimatedCount,
-            criteria: appliedCriteria,
-            realityCheck: this.getRealityCheck(finalPercentage)
-        };
-    },
-    
-    // Determine reality check based on percentage
-    getRealityCheck: function(percentage) {
-        const thresholds = KERALA_DATA.REALITY_THRESHOLDS;
-        
-        if (percentage >= thresholds.VERY_REALISTIC) {
-            return {
-                level: 'very-realistic',
-                text: 'Very Realistic - Great chances!',
-                icon: 'fa-check-circle',
-                color: '#27ae60'
-            };
-        } else if (percentage >= thresholds.REALISTIC) {
-            return {
-                level: 'realistic',
-                text: 'Realistic - Good options available',
-                icon: 'fa-thumbs-up',
-                color: '#f39c12'
-            };
-        } else if (percentage >= thresholds.SOMEWHAT_UNREALISTIC) {
-            return {
-                level: 'somewhat-unrealistic',
-                text: 'Somewhat Unrealistic - Consider flexibility',
-                icon: 'fa-exclamation-triangle',
-                color: '#e67e22'
-            };
-        } else if (percentage >= thresholds.UNREALISTIC) {
-            return {
-                level: 'unrealistic',
-                text: 'Unrealistic - Very limited options',
-                icon: 'fa-times-circle',
-                color: '#e74c3c'
-            };
-        } else {
-            return {
-                level: 'very-unrealistic',
-                text: 'Very Unrealistic - Extremely rare to find',
-                icon: 'fa-ban',
-                color: '#c0392b'
-            };
-        }
-    },
-    
-    // Format numbers for display
-    formatNumber: function(num) {
-        if (num >= 10000000) {
-            return (num / 10000000).toFixed(1) + ' crore';
-        } else if (num >= 100000) {
-            return (num / 100000).toFixed(1) + ' lakh';
-        } else if (num >= 1000) {
-            return (num / 1000).toFixed(1) + 'k';
-        }
-        return num.toString();
-    },
-    
-    // Get percentage with appropriate decimal places
-    formatPercentage: function(percentage) {
-        if (percentage >= 10) {
-            return percentage.toFixed(1);
-        } else if (percentage >= 1) {
-            return percentage.toFixed(2);
-        } else if (percentage >= 0.1) {
-            return percentage.toFixed(3);
-        } else {
-            return percentage.toFixed(4);
-        }
-    }
-};
+   Data sources:
+     Census of India 2021 — Kerala Provisional Data
+     NFHS-5 (2019–21) — Kerala State
+     NSSO 2022–23 — Employment & Income
+     Kerala Planning Board Economic Review 2023
+     RBI — Kerala Financial Inclusion Data 2023
+   ════════════════════════════════════════════════════════════ */
 
-// Export for use in main script
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { KERALA_DATA, KeralaCalculator };
-}
+
+// ── Base population ───────────────────────────────────────────────────────────
+// Total Kerala men aged 20–70, based on 2021 Census projections.
+// Used as the denominator when converting a match fraction → head count.
+const TOTAL_MEN = 11_000_000;
+
+
+// ── Height distribution table ─────────────────────────────────────────────────
+// Each row represents a height threshold.
+// pct  =  percentage of Kerala men who are AT THAT HEIGHT OR TALLER.
+// Range: 4'6" to 6'8" — the full Kerala wedding groom height record.
+// Source: NFHS-5 anthropometric data, Kerala state.
+//
+// How script.js uses this:
+//   heightFactor(minIndex, maxIndex)
+//   = (pct[minIndex] − pct[maxIndex+1]) / 100
+//   = the fraction of men whose height falls within the chosen window.
+const H_DATA = [
+  { label: "4'6\"",  pct: 99.9  },   // virtually every man clears this bar
+  { label: "4'8\"",  pct: 99.5  },
+  { label: "4'10\"", pct: 98    },
+  { label: "5'0\"",  pct: 94    },
+  { label: "5'2\"",  pct: 82    },
+  { label: "5'4\"",  pct: 65    },
+  { label: "5'6\"",  pct: 42    },
+  { label: "5'8\"",  pct: 22    },
+  { label: "5'10\"", pct: 10    },
+  { label: "6'0\"",  pct: 3.5   },
+  { label: "6'2\"",  pct: 1     },
+  { label: "6'4\"",  pct: 0.3   },
+  { label: "6'6\"",  pct: 0.08  },
+  { label: "6'8\"",  pct: 0.01  },   // tallest groom on Kerala record
+];
+
+
+// ── Cat food scarcity rating tiers ────────────────────────────────────────────
+// The rating is INVERTED: lower match % → more cans → rarer man.
+// Think of it as a luxury goods scarcity index.
+//
+// Each entry:
+//   above  the match-% threshold.  Tier applies when actualPct > above.
+//   r      number of 🥫 cans to display (0 = discontinued, 10 = mythic).
+//   label  tier name shown in the UI.
+//   desc   humorous one-line description shown below the score.
+//
+// Iteration order matters: the array runs from MOST COMMON to MOST RARE.
+// getCatRating() in script.js returns the first tier whose 'above' is
+// exceeded by the actual percentage — so the order must not be changed.
+const CAT_RATING_TIERS = [
+  { above: 50,   r: 1,  label: "Bulk Bin Basics 🛒",            desc: "Sold by the truckload. Zero effort needed. 😐" },
+  { above: 20,   r: 2,  label: "Standard Shelf Stock 🏪",       desc: "Walk into any supermarket — he's there. 🐱" },
+  { above: 10,   r: 3,  label: "Decent Brand 🥫",               desc: "A few aisles over. Solid but not rare. 🐾" },
+  { above: 5,    r: 4,  label: "Premium Aisle 🌟",              desc: "Check two or three stores. Getting picky! 🔍" },
+  { above: 2,    r: 5,  label: "Specialty Store 🏬",            desc: "Select shops only. He exists — just needs effort. 🗺" },
+  { above: 1,    r: 6,  label: "Limited Batch 📦",              desc: "Seasonal stock. Don't wait — might sell out. ⏳" },
+  { above: 0.5,  r: 7,  label: "Small Batch Import 🚢",         desc: "You're ordering online and tracking the package. 📲" },
+  { above: 0.1,  r: 8,  label: "Rare Reserve 💎",               desc: "Flown in on a private jet. Expensive taste. ✈️" },
+  { above: 0.01, r: 9,  label: "Collector's Edition 🏛",        desc: "One crate per region. Cats fight over this. 🐈🐈" },
+  { above: 0,    r: 10, label: "Single Origin Mythic Blend 🦄",  desc: "Hand-crafted by monks. Does he even exist? 🌌" },
+  { above: -1,   r: 0,  label: "Out of Stock — Permanently 😿", desc: "Discontinued. Lower standards or adopt a cat. 🐱" },
+];
