@@ -1054,23 +1054,32 @@ function getHeightFactor(minIdx, maxIdx) {
 // ══════════════════════════════════════════
 //  CAT FOOD RATING
 // ══════════════════════════════════════════
+// ── Scarcity logic: LOWER % = MORE bags = RARER man = harder to find
+// Think of it like premium cat food — the scarcer the supply, the more prized every can.
+// A man matching 50%+ of Kerala is bulk-bin ordinary (1 bag).
+// A man matching 0.01% is a hand-imported single-origin delicacy (10 bags).
 function getCatFoodRating(pct) {
   const ratings = [
-    { min: 50,    rating: 10, label: "Widely Available",   desc: "Any cat could find this — basic grocery 😻" },
-    { min: 20,    rating: 9,  label: "Premium Grade",       desc: "On the shelf at most stores 🐱" },
-    { min: 10,    rating: 8,  label: "Above Standard",      desc: "A quality pick, won't take long 🐱" },
-    { min: 5,     rating: 7,  label: "Good Find",           desc: "Worth the extra trip 🐾" },
-    { min: 2,     rating: 6,  label: "Getting Specific",    desc: "Not every store carries this 🏪" },
-    { min: 1,     rating: 5,  label: "Niche Market",        desc: "You'll need to search a bit 🔍" },
-    { min: 0.5,   rating: 4,  label: "Limited Edition",     desc: "Special order territory 📦" },
-    { min: 0.1,   rating: 3,  label: "Rare Import",         desc: "Shipped from a very far land 🚢" },
-    { min: 0.05,  rating: 2,  label: "Collector's Item",   desc: "Found only in myth and legend 🏛" },
-    { min: 0.01,  rating: 1,  label: "Mythical Reserve",    desc: "Do you even real? 🦄" },
-    { min: 0,     rating: 0,  label: "Does Not Exist",      desc: "😿 Even cats gave up. Check your standards." },
+    // pct thresholds checked from HIGHEST to LOWEST
+    // If pct is ABOVE the threshold → this is the scarcity tier
+    { above: 50,   rating: 1,  label: "Bulk Bin Basics 🛒",        desc: "Sold by the truckload. Every corner store has him. No hunt needed. 😐" },
+    { above: 20,   rating: 2,  label: "Standard Shelf Stock 🏪",   desc: "Common enough — just walk into any supermarket. 🐱" },
+    { above: 10,   rating: 3,  label: "Decent Brand 🥫",           desc: "A few aisles over. Nothing special, but not terrible either. 🐾" },
+    { above: 5,    rating: 4,  label: "Premium Aisle 🌟",          desc: "You'll need to check two or three stores. Getting picky! 🔍" },
+    { above: 2,    rating: 5,  label: "Specialty Store Find 🏬",   desc: "Only in select shops. He exists — just needs some effort. 🗺" },
+    { above: 1,    rating: 6,  label: "Limited Batch 📦",          desc: "Seasonal stock. Don't wait — might sell out. ⏳" },
+    { above: 0.5,  rating: 7,  label: "Small Batch Import 🚢",     desc: "You're ordering online and tracking the package. 📲" },
+    { above: 0.1,  rating: 8,  label: "Rare Reserve 💎",           desc: "Flown in on a private jet. You have excellent (expensive) taste. ✈️" },
+    { above: 0.01, rating: 9,  label: "Collector's Edition 🏛",    desc: "One crate per region. Cats fight over this. Seriously. 🐈🐈" },
+    { above: 0,    rating: 10, label: "Single Origin Mythic Blend 🦄", desc: "Hand-crafted by monks in a remote monastery. Does he even exist? 🌌" },
+    // Exactly zero — impossible
+    { above: -1,   rating: 0,  label: "Out of Stock — Permanently 😿", desc: "This flavour has been discontinued. Lower your standards or adopt a cat. 🐱" },
   ];
+
   for (const r of ratings) {
-    if (pct >= r.min) return r;
+    if (pct > r.above) return r;
   }
+  // Fallback: truly zero match
   return ratings[ratings.length - 1];
 }
 
@@ -1079,11 +1088,17 @@ function renderRating(pct) {
   const filled = r.rating;
   const empty = 10 - filled;
   let cans = "";
+  // Filled cans = scarcity level. More cans = harder to find = rarer man.
   for (let i = 0; i < filled; i++) cans += `<span class="cat-can">🥫</span>`;
+  // Empty cans represent how "common" he is — unfilled slots mean he is easy to find.
   for (let i = 0; i < empty; i++) cans += `<span class="cat-can empty">🥫</span>`;
+  const scoreColor = filled >= 8 ? "var(--neon-gold)" : filled >= 5 ? "var(--neon-cyan)" : "var(--text-muted)";
   return `
+    <div style="font-size:0.65rem; color:var(--text-muted); margin-bottom:8px; letter-spacing:0.06em; text-transform:uppercase;">
+      🥫 More cans = scarcer man &nbsp;·&nbsp; Fewer cans = more common
+    </div>
     <div class="rating-cans">${cans}</div>
-    <div class="rating-score">${filled}/10</div>
+    <div class="rating-score" style="color:${scoreColor}">${filled}/10</div>
     <div class="rating-label">${r.label}</div>
     <div class="rating-desc">${r.desc}</div>
   `;
