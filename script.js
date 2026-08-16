@@ -1,407 +1,104 @@
-/* ════════════════════════════════════════════════════════════
-   script.js — Kerala Female Delusion Calculator
-   by @themachopodml
-   ─────────────────────────────────────────────────────────
-   HARD DEPENDENCIES — must be loaded before this file:
-     1. html2canvas  (CDN, declared in index.html <head>)
-     2. kerala-data.js  — provides: TOTAL_MEN, H_DATA, CAT_RATING_TIERS
+const $=id=>document.getElementById(id);
+const INCOME_STEPS=DATA.incomeSteps;
+const CAT=CAT_RATING_TIERS;
 
-   FILE STRUCTURE:
-     §1  Starfield       animated canvas star background
-     §2  heightFactor()  converts dropdown indices → a decimal fraction
-     §3  getCatRating()  looks up a scarcity tier from CAT_RATING_TIERS
-     §4  renderRating()  builds the 🥫 cans HTML for the results panel
-     §5  orSum()         OR aggregation — sums selected checkbox values
-     §6  andProduct()    AND aggregation — multiplies selected values
-     §7  calculate()     main entry point, wired to the Build My Prince button
-     §8  animateResult() count-up animation + ghost-decimal guard
-     §9  buildTags()     builds the "My Standards" tag chips in the results
-     §10 resetAll()      clears every input and the results panel
-     §11 shareResults()  Web Share API with clipboard fallback
-     §12 exportImage()   html2canvas PNG download of the results column
-     §13 flash()         non-blocking toast notification (replaces alert)
-   ════════════════════════════════════════════════════════════ */
+function ft(cm){let t=cm/2.54,f=Math.floor(t/12),i=Math.round(t-f*12);if(i===12){f++;i=0}return `${f}'${i}"`}
 
-
-/* ──────────────────────────────────────────────────────────────
-   §1  STARFIELD
-   A lightweight canvas animation that draws 200 twinkling cyan
-   stars behind the page.  Uses a simple sine-wave for opacity
-   so each star pulses independently.  Re-initialises on resize
-   so stars always fill the whole viewport.
-────────────────────────────────────────────────────────────── */
-(function () {
-  const c = document.getElementById("stars");
-  const ctx = c.getContext("2d");
-  let W, H, stars;
-
-  function resize() { W = c.width = window.innerWidth; H = c.height = window.innerHeight; }
-
-  function init() {
-    stars = Array.from({ length: 200 }, () => ({
-      x: Math.random() * W,
-      y: Math.random() * H,
-      r: Math.random() * 1.2 + 0.2,
-      phase: Math.random() * Math.PI * 2,
-      speed: Math.random() * 0.003 + 0.001,
-    }));
-  }
-
-  function draw(t) {
-    ctx.clearRect(0, 0, W, H);
-    stars.forEach(s => {
-      const a = 0.25 + 0.6 * (0.5 + 0.5 * Math.sin(t * s.speed + s.phase));
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(0,238,255,${a * 0.55})`;
-      ctx.fill();
-    });
-    requestAnimationFrame(draw);
-  }
-
-  window.addEventListener("resize", () => { resize(); init(); });
-  resize(); init();
-  requestAnimationFrame(draw);
-})();
-
-
-/* ──────────────────────────────────────────────────────────────
-   §2–§4  HEIGHT HELPER · CAT FOOD RATING · RENDER RATING
-────────────────────────────────────────────────────────────── */
-/* ══════════════════════════════════════════════════════════════
-   HEIGHT HELPER
-   Converts two dropdown indices (min, max) into the fraction of
-   Kerala men whose height falls within that window.
-   Uses H_DATA from kerala-data.js.
-══════════════════════════════════════════════════════════════ */
-function heightFactor(minI, maxI) {
-  if (minI > maxI) return 0;
-  // pct[minI] = % of men at minI or taller
-  // pct[maxI+1] = % of men above the max cut-off (excluded)
-  // difference = % of men strictly within the chosen range
-  const above    = H_DATA[minI].pct;
-  const aboveMax = maxI < H_DATA.length - 1 ? H_DATA[maxI + 1].pct : 0;
-  return (above - aboveMax) / 100;
+function rangeUI(t){
+  const a=$(t+'Min'),b=$(t+'Max');
+  let lo=+a.value,hi=+b.value;
+  if(lo>hi){if(document.activeElement===a)b.value=lo;else a.value=hi;lo=+a.value;hi=+b.value}
+  $(t+'MinOut').textContent=t==='age'?lo:`${lo} cm (${ft(lo)})`;
+  $(t+'MaxOut').textContent=t==='age'?(hi>=70?'70+':hi):`${hi} cm (${ft(hi)})`;
+  const p=(lo-+a.min)/(+a.max-+a.min)*100,q=(hi-+a.min)/(+a.max-+a.min)*100;
+  $(t+'Range').style.setProperty('--start',p+'%');
+  $(t+'Range').style.setProperty('--end',q+'%');
 }
 
-
-/* ══════════════════════════════════════════════════════════════
-   CAT FOOD SCARCITY RATING
-   Delegates entirely to CAT_RATING_TIERS from kerala-data.js.
-   To add, remove, or relabel a tier — edit kerala-data.js only.
-══════════════════════════════════════════════════════════════ */
-function getCatRating(pct) {
-  for (const t of CAT_RATING_TIERS) {
-    if (pct > t.above) return t;
-  }
-  // Fallback: pct is exactly 0 or negative — "out of stock"
-  return CAT_RATING_TIERS[CAT_RATING_TIERS.length - 1];
+function incomeUI(){
+  const i=+$('income').value;
+  $('incomeOut').textContent=INCOME_STEPS[i].label;
+  $('income').style.setProperty('--income-pos',i/17*100+'%');
+  $('incomeTicks').innerHTML=INCOME_STEPS.map((x,n)=>`<button type="button" class="income-tick ${n===i?'active':''}" data-i="${n}">${x.label}</button>`).join('');
+  document.querySelectorAll('.income-tick').forEach(b=>b.onclick=()=>{$('income').value=b.dataset.i;incomeUI()});
 }
 
-// Builds the 🥫 can row HTML and score display for the results panel.
-// Filled cans = scarcity level. Empty cans = how common he is.
-function renderRating(pct) {
-  const t      = getCatRating(pct);
-  const filled = t.r;
-  const empty  = 10 - filled;
-  let cans = "";
-  for (let i = 0; i < filled; i++) cans += `<span class="can">🥫</span>`;
-  for (let i = 0; i < empty;  i++) cans += `<span class="can empty">🥫</span>`;
-  // Score colour: gold for ultra-rare (8+), cyan for mid-range (5–7), muted for common
-  const col = filled >= 8 ? "var(--gold)" : filled >= 5 ? "var(--cyan)" : "var(--sub)";
-  return `
-    <div class="rhint">🥫 More cans = scarcer man · Fewer cans = more common</div>
-    <div class="rcans">${cans}</div>
-    <div class="rscore" style="color:${col}">${filled} / 10</div>
-    <div class="rlbl">${t.label}</div>
-    <div class="rdesc">${t.desc}</div>`;
+function orF(n){let v=[...document.querySelectorAll(`input[name="${n}"]:checked`)].map(x=>+x.value);return v.length?Math.min(1,v.reduce((a,b)=>a+b,0)):0}
+function andF(n){let v=[...document.querySelectorAll(`input[name="${n}"]:checked`)].map(x=>+x.value);return v.length?v.reduce((a,b)=>a*b,1):1}
+
+function agePool(a,z){
+  return DATA.ageBands.reduce((s,b)=>{
+    const lo=Math.max(a,b.min),hi=Math.min(z,b.max);
+    return hi>=lo?s+(b.weight*DATA.malePopulation21to70):s;
+  },0);
 }
 
-
-/* ──────────────────────────────────────────────────────────────
-   §5–§13  CALCULATOR LOGIC
-────────────────────────────────────────────────────────────── */
-/* ═══════════════════════════════════════════════════════════
-   HELPERS
-═══════════════════════════════════════════════════════════ */
-// OR: sum checked values, cap at 100%
-function orSum(name) {
-  let s = 0;
-  document.querySelectorAll(`input[name="${name}"]:checked`).forEach(e => s += +e.value);
-  return Math.min(s, 100);
+function heightF(a,z){
+  const hs=DATA.heights.filter(h=>h>=a&&h<=z);
+  if(!hs.length)return 0;
+  const lo=Math.min(...hs),hi=Math.max(...hs);
+  const upper=DATA.heightModel[lo]||0;
+  const next=DATA.heights[DATA.heights.indexOf(hi)+1];
+  const above=next===undefined?0:(DATA.heightModel[next]||0);
+  return Math.max(.000001,upper-above);
 }
 
-// AND: multiply each checked value as a fraction
-function andProduct(name) {
-  let f = 1;
-  document.querySelectorAll(`input[name="${name}"]:checked`).forEach(e => f *= +e.value / 100);
-  return f;
+function renderCat(p){
+  const t=CAT.find(x=>p>x.above)||CAT[CAT.length-1];
+  let c='';
+  for(let i=0;i<10;i++)c+=`<span class="can ${i<t.r?'':'empty'}">🥫</span>`;
+  return `<div class="rhint">🥫 More cans = scarcer man · Fewer cans = more common</div><div class="rcans">${c}</div><div class="rscore">${t.r} / 10</div><div class="rlbl">${t.label}</div><div class="rdesc">${t.desc}</div>`;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   CALCULATE
-═══════════════════════════════════════════════════════════ */
-// TOTAL_MEN is declared in kerala-data.js — no redeclaration needed here.
+function pctText(p){return (p<.01?p.toFixed(4):p<.1?p.toFixed(3):p<1?p.toFixed(2):p.toFixed(1))+'%'}
 
-function calculate() {
-  const agePct = orSum("age");
-  if (!agePct) { flash("Select at least one age group."); return; }
-
-  const minI = +document.getElementById("height-min").value;
-  const maxI = +document.getElementById("height-max").value;
-  const errEl = document.getElementById("height-err");
-  if (minI > maxI) { errEl.style.display = "block"; return; }
-  errEl.style.display = "none";
-
-  const eduFact  = +document.getElementById("education").value / 100;
-  const incFact  = +document.getElementById("income").value    / 100;
-
-  const empPct = orSum("emp");
-  if (!empPct)  { flash("Select at least one employment type."); return; }
-
-  const relPct = orSum("rel");
-  if (!relPct)  { flash("Select at least one religion."); return; }
-
-  const bodyPct = orSum("body");
-  if (!bodyPct) { flash("Select at least one body type."); return; }
-  let bodyFact = bodyPct / 100;
-  if (document.getElementById("exclude-obese").checked) bodyFact *= 0.77;
-
-  const marPct = orSum("mar");
-  if (!marPct)  { flash("Select at least one marital status."); return; }
-
-  const locPct = orSum("loc");
-  if (!locPct)  { flash("Select at least one location."); return; }
-
-  const lifeFact  = andProduct("life");
-  const assetFact = andProduct("asset");
-
-  // All cross-category conditions are AND-ed (multiplicative)
-  const factor = (agePct / 100) * heightFactor(minI, maxI) * eduFact * incFact
-               * (empPct / 100) * (relPct / 100) * bodyFact
-               * (marPct / 100) * (locPct / 100) * lifeFact * assetFact;
-
-  const finalPct   = factor * 100;
-  const exactCount = factor * TOTAL_MEN;  // TOTAL_MEN is defined in kerala-data.js
-
-  animateResult(finalPct, exactCount, Math.round(exactCount));
-  document.getElementById("rating-display").innerHTML = renderRating(finalPct);
-  buildTags(minI, maxI);
-  document.getElementById("rcol").classList.add("done");
+function calc(){
+  try{
+    const a=+$('ageMin').value,z=+$('ageMax').value,h1=+$('heightMin').value,h2=+$('heightMax').value;
+    if(a>z||h1>h2)throw Error('Check the selected range.');
+    const ef=+$('education').value,ii=+$('income').value,inf=INCOME_STEPS[ii].factor;
+    const wf=orF('emp'),rf=orF('rel'),bf=orF('body'),mf=orF('mar'),lf=orF('loc');
+    if(!wf||!rf||!bf||!mf||!lf)throw Error('Select at least one option in each required section.');
+    let body=bf;if($('exclude-obese').checked)body*=DATA.model.nonObese;
+    const as=andF('asset'),life=andF('life');
+    const af=agePool(a,z)/DATA.malePopulation21to70;
+    const hf=heightF(h1,h2);
+    const factor=af*hf*ef*inf*wf*rf*body*mf*lf*as*life;
+    const finalPct=factor*100;
+    const count=Math.round(DATA.malePopulation21to70*factor);
+    $('count').textContent=count<1?'≈ 0':`≈ ${count.toLocaleString('en-IN')} men`;
+    $('percent').textContent=pctText(finalPct);
+    $('confidence').textContent=(ii>=8||$('exclude-obese').checked)?'MODELLED COVERAGE':'DEMOGRAPHIC ESTIMATE';
+    $('resultText').textContent=count<1?'The selected combination produces less than one modelled match in the Kerala demographic base.':`The model estimates roughly ${count.toLocaleString('en-IN')} men in the selected demographic base. This is not a live availability count.`;
+    $('meterBar').style.width=Math.min(100,Math.max(.25,finalPct))+'%';
+    $('rating-display').innerHTML=renderCat(finalPct);
+    buildTags(a,z,h1,h2,ii);
+  }catch(e){flash(e.message)}
 }
 
-/* ═══════════════════════════════════════════════════════════
-   ANIMATE RESULT
-   Ghost-decimal guard: when exactCount < 1, not even one
-   whole man in Kerala statistically satisfies all criteria.
-   Show ~0% clearly rather than a confusing tiny decimal.
-═══════════════════════════════════════════════════════════ */
-function animateResult(targetPct, exactCount, roundCount) {
-  const pEl = document.getElementById("mpct");
-  const cEl = document.getElementById("mcnt");
-
-  if (exactCount < 1) {
-    pEl.textContent = "~0%";
-    pEl.className   = "mpct zero";
-    cEl.textContent = "Statistically none — not even 1 man matches all criteria";
-    return;
-  }
-
-  const t0 = performance.now(), dur = 700;
-  (function step(now) {
-    const t    = Math.min((now - t0) / dur, 1);
-    const ease = 1 - Math.pow(1 - t, 3);
-    const cur  = targetPct * ease;
-    const cnt  = Math.round(roundCount * ease);
-
-    pEl.textContent = targetPct < 0.01 ? targetPct.toFixed(4) + "%"
-                    : targetPct < 0.1  ? cur.toFixed(4) + "%"
-                    : targetPct < 1    ? cur.toFixed(3) + "%"
-                    :                    cur.toFixed(2) + "%";
-
-    pEl.className = "mpct" + (targetPct < 1 ? " zero" : "");
-
-    cEl.textContent = cnt < 1000   ? `≈ ${cnt.toLocaleString()} men`
-                    : cnt < 100000 ? `≈ ${(cnt / 1000).toFixed(1)}K men`
-                    :                `≈ ${(cnt / 100000).toFixed(2)} Lakh men`;
-
-    if (t < 1) requestAnimationFrame(step);
-  })(t0);
+function buildTags(a,z,h1,h2,ii){
+  const tags=[`Age ${a}–${z>=70?'70+':z}`,`Height ${h1}–${h2} cm`,`Education ${$('education').selectedOptions[0].text}`,`Income ${INCOME_STEPS[ii].label}`];
+  const ep=orF('emp'),rp=orF('rel'),bp=orF('body'),mp=orF('mar'),lp=orF('loc');
+  if(ep)tags.push(`Employment ${Math.round(ep*100)}%`);if(rp)tags.push(`Religion ${Math.round(rp*100)}%`);if(bp)tags.push(`Body ${Math.round(bp*100)}%`);if($('exclude-obese').checked)tags.push('Non-Obese Only');if(mp)tags.push(`Marital ${Math.round(mp*100)}%`);if(lp)tags.push(`Location ${Math.round(lp*100)}%`);
+  document.querySelectorAll('input[name="asset"]:checked').forEach(x=>tags.push(x.closest('.cb').textContent.trim()));
+  document.querySelectorAll('input[name="life"]:checked').forEach(x=>tags.push(x.closest('.cb').textContent.trim()));
+  $('tags').innerHTML=tags.map(t=>`<span>${t}</span>`).join('');
 }
 
-/* ═══════════════════════════════════════════════════════════
-   BUILD TAGS
-═══════════════════════════════════════════════════════════ */
-function buildTags(minI, maxI) {
-  const box  = document.getElementById("tags");
-  const tags = [];
-
-  const agePct = orSum("age");
-  if (agePct) tags.push(`Age: ${agePct}%`);
-
-  tags.push(`Height: ${H_DATA[minI].label} – ${H_DATA[maxI].label}`);
-
-  const eduTxt = document.getElementById("education").selectedOptions[0].text;
-  tags.push("Edu: " + (eduTxt.match(/\(([^)]+)\)/)?.[1] ?? eduTxt));
-
-  const incTxt = document.getElementById("income").selectedOptions[0].text;
-  tags.push("Income: " + (incTxt.match(/\(([^)]+)\)/)?.[1] ?? incTxt));
-
-  const empPct = orSum("emp");
-  if (empPct) tags.push(`Employment: ${empPct}%`);
-
-  const relPct = orSum("rel");
-  if (relPct) tags.push(`Religion: ${relPct}%`);
-
-  const bodyPct = orSum("body");
-  if (bodyPct) tags.push(`Body: ${bodyPct}%`);
-
-  if (document.getElementById("exclude-obese").checked) tags.push("Non-Obese Only");
-
-  const marPct = orSum("mar");
-  if (marPct) tags.push(`Marital: ${marPct}%`);
-
-  const locPct = orSum("loc");
-  if (locPct) tags.push(`Location: ${locPct}%`);
-
-  document.querySelectorAll(`input[name="life"]:checked`).forEach(el =>
-    tags.push(el.closest(".cb").textContent.trim().split(" ")[0]));
-
-  document.querySelectorAll(`input[name="asset"]:checked`).forEach(el =>
-    tags.push(el.closest(".cb").textContent.trim().split("(")[0].trim()));
-
-  box.innerHTML = tags.length
-    ? tags.map(t => `<span class="tag">${t}</span>`).join("")
-    : `<span class="tph">Standards will appear after calculation</span>`;
+function resetCalc(){
+  document.querySelectorAll('input[type=checkbox]').forEach(x=>x.checked=false);
+  [['mar','.52'],['loc','1'],['rel','1'],['body','.40']].forEach(([n,v])=>{const x=document.querySelector(`input[name="${n}"][value="${v}"]`);if(x)x.checked=true});
+  document.querySelector('input[name="emp"][value=".28"]').checked=true;
+  $('education').selectedIndex=0;$('income').value=0;$('ageMin').value=25;$('ageMax').value=34;$('heightMin').value=150;$('heightMax').value=195;
+  rangeUI('age');rangeUI('height');incomeUI();$('count').textContent='—';$('percent').textContent='—';$('confidence').textContent='WAITING';$('resultText').textContent='Set your standards and build your Prince profile.';$('meterBar').style.width='0';$('rating-display').innerHTML='<div class="rplaceholder">Awaiting calibration…</div>';$('tags').innerHTML='';
 }
 
-/* ═══════════════════════════════════════════════════════════
-   RESET
-═══════════════════════════════════════════════════════════ */
-function resetAll() {
-  document.querySelectorAll("input[type=checkbox]").forEach(el => el.checked = false);
-  document.getElementById("education").selectedIndex  = 0;
-  document.getElementById("income").selectedIndex     = 0;
-  document.getElementById("height-min").selectedIndex = 0;
-  document.getElementById("height-max").selectedIndex = 13;
-  document.getElementById("height-err").style.display = "none";
-  document.getElementById("mpct").textContent = "–";
-  document.getElementById("mpct").className   = "mpct";
-  document.getElementById("mcnt").textContent = "Press 👑 Build My Prince to reveal your fate";
-  document.getElementById("rating-display").innerHTML =
-    `<div class="rplaceholder">Awaiting calibration…</div>`;
-  document.getElementById("tags").innerHTML =
-    `<span class="tph">Standards will appear after calculation</span>`;
-  document.getElementById("rcol").classList.remove("done");
-}
+async function share(){const t=`KL FemDelCalc by @themachopodml\nPrince pool: ${$('count').textContent} (${ $('percent').textContent })`;try{if(navigator.share)await navigator.share({title:'KL FemDelCalc',text:t,url:location.href});else{await navigator.clipboard.writeText(t+'\n'+location.href);flash('Result copied.')}}catch(e){if(e.name!=='AbortError')flash('Share failed.')}}
 
-/* ═══════════════════════════════════════════════════════════
-   SHARE / EXPORT
-═══════════════════════════════════════════════════════════ */
-function shareResults() {
-  const p   = document.getElementById("mpct").textContent;
-  const msg = `My Kerala Prince result: ${p} match! 😻 Try it: ${location.href}`;
-  if (navigator.share) {
-    navigator.share({ title: "Kerala Female Delusion Calculator", text: msg, url: location.href });
-  } else {
-    navigator.clipboard.writeText(msg).then(() => flash("Copied to clipboard!"));
-  }
-}
+function exportImage(){const target=$('rcol');if($('count').textContent==='—'){flash('Run Build My Prince first, then export your result.');return}if(typeof html2canvas==='undefined'){flash('PNG export library is unavailable.');return}flash('Capturing your result…');html2canvas(target,{backgroundColor:'#080309',scale:2,useCORS:true,logging:false}).then(canvas=>canvas.toBlob(blob=>{const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='KL-FemDelCalc-result.png';a.click();URL.revokeObjectURL(url);flash('PNG exported.')})).catch(()=>flash('PNG export failed.'))}
 
-// ═══════════════════════════════════════════════════════════
-//  EXPORT AS PNG
-//  Uses html2canvas to render the results panel into a canvas,
-//  then converts that canvas to a PNG data URL and triggers a
-//  browser download — no server, no permissions, no popups.
-// ═══════════════════════════════════════════════════════════
-function exportImage() {
-  const target = document.getElementById("rcol");
+function flash(t){const x=document.querySelector('.toast');x.textContent=t;x.classList.add('show');clearTimeout(window.__toast);window.__toast=setTimeout(()=>x.classList.remove('show'),2600)}
 
-  // Guard: make sure a calculation has actually been run first,
-  // so we don't export a blank "Awaiting calibration…" card.
-  const pctText = document.getElementById("mpct").textContent;
-  if (pctText === "–") {
-    flash("Run 👑 Build My Prince first, then export your result.");
-    return;
-  }
+(function(){const c=$('stars'),x=c.getContext('2d');let w,h,s=[];function size(){w=c.width=innerWidth;h=c.height=innerHeight;s=Array.from({length:160},()=>({x:Math.random()*w,y:Math.random()*h,r:.2+Math.random()*1.1,p:Math.random()*6.28}))}function draw(t){x.clearRect(0,0,w,h);s.forEach(a=>{x.globalAlpha=.12+.18*Math.sin(t*.001+a.p);x.fillStyle='#ffc94a';x.beginPath();x.arc(a.x,a.y,a.r,0,6.28);x.fill()});requestAnimationFrame(draw)}addEventListener('resize',size);size();requestAnimationFrame(draw)})();
 
-  flash("📸 Capturing your result…");
-
-  // html2canvas works best when backdrop-filter blur is removed
-  // temporarily, because it cannot composite blur across layers.
-  // We store the original value, clear it, capture, then restore.
-  const originalFilter = target.style.backdropFilter;
-  target.style.backdropFilter = "none";
-  // Also temporarily boost the card background opacity so the
-  // dark surface looks solid in the exported image.
-  target.style.background = "rgba(7, 7, 32, 0.98)";
-
-  html2canvas(target, {
-    backgroundColor: "#020210",   // match the page background colour
-    scale: 2,                     // 2× pixel density → crisp on retina / high-DPI screens
-    useCORS: true,                // allow cross-origin resources (fonts, logo)
-    logging: false,               // suppress console noise
-    // Ignore the starfield canvas behind the page — we only want the card
-    ignoreElements: (el) => el.id === "stars",
-  }).then(canvas => {
-
-    // Restore the original styles before the user sees anything change
-    target.style.backdropFilter = originalFilter;
-    target.style.background     = "";
-
-    // Convert the canvas to a PNG blob URL and trigger a download.
-    // The filename includes the match % so exported files are
-    // self-describing when saved to disk.
-    canvas.toBlob(blob => {
-      const url      = URL.createObjectURL(blob);
-      const link     = document.createElement("a");
-      link.href      = url;
-      link.download  = `kerala-prince-result-${pctText.replace("%","pct")}.png`;
-      link.click();
-
-      // Clean up the object URL after a short delay to free memory
-      setTimeout(() => URL.revokeObjectURL(url), 5000);
-
-      flash("✅ PNG saved!");
-    }, "image/png");
-
-  }).catch(err => {
-    // Restore styles even if something went wrong
-    target.style.backdropFilter = originalFilter;
-    target.style.background     = "";
-    console.error("Export error:", err);
-    flash("Export failed — try a screenshot instead (Ctrl+Shift+S).");
-  });
-}
-
-/* ═══════════════════════════════════════════════════════════
-   FLASH MESSAGE  — replaces browser alert() for clean UX
-═══════════════════════════════════════════════════════════ */
-function flash(msg) {
-  let el = document.getElementById("flash-msg");
-  if (!el) {
-    el = document.createElement("div");
-    el.id = "flash-msg";
-    Object.assign(el.style, {
-      position: "fixed", bottom: "24px", left: "50%",
-      transform: "translateX(-50%)",
-      background: "rgba(6,6,30,0.97)",
-      border: "1px solid rgba(255,48,128,0.45)",
-      color: "#ff3080",
-      fontFamily: "Exo 2, sans-serif",
-      fontSize: "0.86rem",
-      fontWeight: "600",
-      padding: "12px 22px",
-      borderRadius: "12px",
-      zIndex: "9999",
-      boxShadow: "0 4px 24px rgba(255,48,128,0.35)",
-      pointerEvents: "none",
-      transition: "opacity 0.4s",
-    });
-    document.body.appendChild(el);
-  }
-  el.textContent   = msg;
-  el.style.opacity = "1";
-  clearTimeout(el._t);
-  el._t = setTimeout(() => { el.style.opacity = "0"; }, 2700);
-}
+document.addEventListener('DOMContentLoaded',()=>{rangeUI('age');rangeUI('height');[$('ageMin'),$('ageMax')].forEach(x=>x.oninput=()=>rangeUI('age'));[$('heightMin'),$('heightMax')].forEach(x=>x.oninput=()=>rangeUI('height'));incomeUI();$('income').oninput=incomeUI;$('calculateBtn').onclick=calc;$('resetBtn').onclick=resetCalc;$('shareBtn').onclick=share;$('exportBtn').onclick=exportImage});
