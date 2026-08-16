@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="macho-pod-logo.png" alt="The Macho Pod logo" width="180">
+  <img src="https://raw.githubusercontent.com/themachopodml/Female-Delusion-Calculator-Kerala/main/macho-pod-logo.png" alt="The Macho Pod logo" width="180">
 </div>
 
 # 🧮 Kerala Female Delusion Calculator
@@ -15,81 +15,72 @@ A statistically-grounded interactive calculator for Kerala that estimates how ra
 
 ## 🌟 Features
 
-**Age Range** — redesigned as a draggable dual-handle range from **21 to 70+**, following the newer FemDelCalc interface.
+**Age Range** — draggable dual-handle range from **21 to 70+**.
 
-**Height Range** — redesigned as a draggable dual-handle range from **4'6" to 6'8"**. This is a calculator-defined Kerala envelope retained from the earlier version, not a claim that the Government maintains a wedding-groom height registry.
+**Height Range** — clean draggable dual-handle range from **4'6" to 6'8"**. This is a calculator-defined Kerala envelope, not a claim that the Government maintains a wedding-groom height registry.
 
-**💰 Annual Personal Income** — replaces the old monthly-income selector with annual personal-income thresholds from ₹3 lakh+ through ₹5 crore+.
+**💰 Annual Personal Income** — draggable income bar from ₹1 lakh+ through ₹5 crore+.
 
 **🏠 Asset Requirements** — Own House, Own Car, Own Business, Financial Assets, Own Land / Plot and Two-Wheeler.
 
-**🚫 Exclude Obese / Overweight** — updated using NFHS-6 Kerala's published adult male overweight-or-obese indicator.
+**🚫 Exclude Obese** — optional body-profile exclusion.
 
-**🐱 Cat Food Scarcity Rating** — a 10-can rarity scale. Lower modelled match percentage means more cans and greater statistical scarcity.
+**🛕 Caste / Social Category** — inactive by default and becomes usable only when **Hindu** is selected under Religion.
 
-**Readable futuristic dashboard** — typography and controls have been substantially enlarged for easier reading while retaining the dark neon interface.
+**📍 Location Preference** — Urban Areas, Rural Areas and NRI / Abroad.
 
-**Responsive layout** — desktop dashboard plus a single-column mobile layout.
+**🌿 Lifestyle Preferences** — Non-Smoker, Non-Drinker, Vegetarian, Fitness Conscious, Religiously Active and No Tobacco Use.
+
+**🥫 Cat Food Scarcity Rating** — a visual 10-can rarity scale. More cans means greater statistical scarcity.
+
+**Share + Export PNG** — share the calculator link or export the calculator dashboard as a PNG image.
+
+**Readable futuristic dashboard** — enlarged typography, clean contained range controls and responsive desktop/mobile layout.
 
 ---
 
 ## 📊 Data Sources & Update Status
 
-The Kerala calculator has been refreshed against the latest government releases available in August 2026.
+The Kerala calculator uses the latest government releases available for the model and does not invent future Census results.
 
 ### Census
 
-**Census of India 2011 remains the latest completed population Census.** The Office of the Registrar General and Census Commissioner is currently conducting preparatory work for **Census 2027**, including 2026 pre-tests and first-phase operations. Final Census 2027 population results do not exist yet, so they are not fabricated into this calculator.
+**Census of India 2011 remains the latest completed population Census.** Census 2027 is underway, but final population results are not available yet.
 
-The calculator therefore uses:
-- Census of India 2011 demographic classifications
-- Government of India Population Projection Report 2011–2036 where a current age/sex base is needed
-- Current Census 2027 status only as a source-status note
+The calculator therefore uses Census 2011 demographic classifications and Government of India population projections where a current population base is required.
 
 ### NFHS-6
 
-**NFHS-6 (2023–24)** was released in May 2026 and is the newest National Family Health Survey.
-
-For Kerala, NFHS-6 reports:
-- Men aged 15–49 with BMI ≥25 (overweight or obese): **37.0%**
-- Therefore the calculator uses **63.0%** as the non-overweight/non-obese screening share when the exclusion filter is enabled.
-
-Important: NFHS publishes **overweight or obese combined**, not an obesity-only percentage in this indicator. The calculator therefore does not mislabel 37% as "obesity".
+**NFHS-6 (2023–24)** is the latest National Family Health Survey release. For Kerala, the published adult-male BMI indicator combines overweight and obesity. The calculator therefore treats the exclusion as a screening proxy rather than falsely presenting the combined indicator as an obesity-only statistic.
 
 ### Employment & Income
 
-**MoSPI PLFS Annual Report 2025** is the latest annual PLFS release used for employment and earnings context. PLFS collects earnings information for self-employed workers, regular wage/salaried employees and casual labour.
-
-The calculator's high annual-income thresholds are **modelled scarcity tiers**, because PLFS does not publish one official table containing the exact Kerala male matrimonial population at every ₹10 lakh, ₹20 lakh, ₹50 lakh, ₹1 crore and ₹5 crore annual-income threshold.
+**MoSPI PLFS Annual Report 2025** is used for employment and earnings context. The high-income tiers in the calculator are modelled scarcity thresholds because government publications do not provide one table containing every Kerala male matrimonial intersection at ₹10 lakh, ₹20 lakh, ₹50 lakh, ₹1 crore and ₹5 crore annual income.
 
 ### Kerala economic context
 
-The Kerala State Planning Board's **Economic Review 2025** is the current annual state economic review used as contextual source material.
+Kerala State Planning Board economic reviews are used as contextual state-level source material.
 
 ---
 
 ## ⚙️ How the Calculation Works
 
-Within a category, selected alternatives are treated as OR. For example, selecting both Government and Private employment accepts either group.
-
-Across categories, conditions are combined as AND. The model therefore multiplies the selected shares:
+Within a category, selected alternatives are treated as OR. Across categories, conditions are combined as AND. The result is therefore a screening model that multiplies selected shares rather than querying a live matrimonial database.
 
 ```text
 Final match % ≈
 Age × Height × Education × Income × Employment
-× Religion × Body × Marital × Location
-× Assets × Lifestyle × Social Category
+× Religion × Caste × Body × Marital × Location
+× Assets × Lifestyle
 ```
 
-This is a **screening model**, not a live matrimonial database.
+Government datasets do not publish the exact intersection of all these characteristics. Characteristics are also correlated in real life, so the multiplication model can overstate or understate the true intersection.
 
-Government datasets do not publish the exact intersection of age + height + income + education + employment + religion + marital status + assets + lifestyle + location. Therefore the final percentage is a modelled statistical estimate. Characteristics are also correlated in real life, so multiplying independent-looking percentages can overstate or understate the true intersection.
-
-The result should not be presented as "X actual bachelors are currently available in Kerala."
+The displayed number should not be described as the number of actual bachelors currently available in Kerala.
 
 ---
 
-## 🐱 Cat Food Rating Scale
+## 🥫 Cat Food Rating Scale
 
 | Cans | Match % | Rating |
 |------|---------|--------|
@@ -113,9 +104,10 @@ The result should not be presented as "X actual bachelors are currently availabl
 
 - Census 2027 final population data are not available yet.
 - There is no official Kerala registry of the shortest or tallest wedding groom. The 4'6"–6'8" height envelope is a calculator input, not a government statistic.
-- NFHS-6's BMI indicator combines overweight and obesity.
+- NFHS BMI reporting combines overweight and obesity in the relevant indicator.
 - PLFS does not publish every high-income threshold used here.
-- Asset combinations are modelled screening factors, not direct counts of Kerala men owning each asset simultaneously.
+- Asset combinations are modelled screening factors.
+- Caste / Social Category is intentionally gated to Hindu selection and is not a claim that non-Hindu groups have a single comparable caste structure.
 - The calculator estimates statistical scarcity. It does not measure attraction, compatibility, willingness to marry, family approval, geography, timing or actual availability.
 
 ---
