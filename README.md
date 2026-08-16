@@ -1,9 +1,13 @@
+<div align="center">
+  <img src="macho-pod-logo.png" alt="The Macho Pod logo" width="180">
+</div>
+
 # 🧮 Kerala Female Delusion Calculator
 ### by [@themachopodml](https://github.com/themachopodml)
 
 > *"How rare is your Prince, really?"*
 
-A statistically-grounded, interactive web calculator that helps women in Kerala understand the realistic probability of finding a man who matches their ideal preferences — based on real government census and survey data. The result isn't a judgement; it's a mirror.
+A statistically-grounded interactive calculator for estimating how rare a male profile becomes when multiple preferences are combined. The Kerala version uses the latest available official population projections and government survey sources, while clearly separating published data from modelled assumptions where an exact cross-tabulation is not published.
 
 **🔗 Live Site:** [themachopodml.github.io/Female-Delusion-Calculator-Kerala](https://themachopodml.github.io/Female-Delusion-Calculator-Kerala)
 
@@ -11,53 +15,64 @@ A statistically-grounded, interactive web calculator that helps women in Kerala 
 
 ## 🌟 Features
 
-**11 Preference Categories** covering every major criterion women typically look for in a partner — age range (20–70 in 5-year bands), height range (4'6" to 6'8", spanning the full Kerala groom height record), minimum education level, minimum monthly income, employment type, religion, body type, marital history, location, lifestyle habits, and asset ownership.
+**11+ Preference Categories** covering age, height, minimum qualification, annual personal income, employment, religion, body type, marital status, location, lifestyle and asset requirements.
 
-**🐱 Cat Food Scarcity Rating** — the signature feature. After calculating, your result is scored out of 10 using a cat food rarity metaphor. The logic is *inverted on purpose*: the lower your match percentage, the more cans you score — because a man who only 0.01% of Kerala men qualify for is an ultra-rare collector's import, not a bulk-bin basic. Think of it as a luxury goods scarcity index, but for human compatibility.
+**👑 Build My Prince** — age and height use the same draggable dual-range controls used by the India FemDelCalc. Age runs from 21 to 70+; height runs from 122 cm to 251 cm.
 
-**Ghost-decimal protection** — when the combination of filters is so strict that not even one whole man statistically exists (e.g. 0.03 of a person), the calculator displays `~0%` with the message *"Statistically none — not even 1 man matches all criteria"* rather than showing a confusing tiny decimal alongside "0 men".
+**💰 Annual Personal Income** — a stepped LPA threshold control from 1 LPA through crore, billion and trillion-level scarcity tiers. Tiers above normal survey coverage are explicitly modelled rather than presented as official survey percentages.
 
-**Viewport-fitted desktop layout** — on PC, the entire calculator fits within a single browser window with no page scroll needed. Preferences are arranged in a dense, dashboard-style grid so everything is accessible at a glance.
+**🏠 Asset Requirements** — Own House, Own Car, Own Business, Financial Assets, Own Land / Plot and Two-Wheeler.
 
-**Mobile-first responsive design** — on phones, the layout switches to a single column with the results panel shown *first*, so after scrolling through and pressing Build My Prince, your result is visible without needing to scroll back up. Touch targets are enlarged for comfortable use.
+**🚫 Exclude Obese** — optional body-composition filter.
 
-**Self-contained single file** — the logo, favicon, and all styles are embedded directly inside `index.html`. No external dependencies, no CDN calls for assets, no separate image files required.
+**🐱 Cat Food Scarcity Rating** — the result is presented on the 10-can scarcity scale. Lower modelled match percentage means more cans and a rarer statistical profile.
+
+**Viewport-fitted desktop dashboard** — the calculator is designed as a compact multi-column interface, while smaller screens switch to a normal scrollable layout.
+
+**Large readable typography** — interface text has been substantially enlarged for easier reading on desktop displays. Because apparently software occasionally needs to remember that humans have eyes.
 
 ---
 
 ## 📊 Data Sources
 
-All statistics are drawn from authoritative Indian government sources. The calculator does not use estimates or guesswork — every percentage shown next to a filter option is sourced from the following:
+The calculator distinguishes published government inputs from model assumptions. It does not claim that an exact Kerala-wide intersection of every requested characteristic exists in one official table.
 
-- **Census of India 2021** — Kerala State Provisional Data (population, age distribution, marital status, religion, location)
-- **National Family Health Survey (NFHS-5) 2019–21** — Kerala State (body type / BMI distribution, asset ownership, household characteristics)
-- **National Sample Survey Office (NSSO) 2022–23** — Employment & Income data for Kerala
-- **Kerala State Planning Board Economic Review 2023** — state-level economic indicators
-- **Reserve Bank of India — Kerala Financial Inclusion Data 2023** (financial asset ownership estimates)
+- **Census of India 2011** — C-01 religion and sex; C-02 marital status by age and sex; C-08/C-08A education; C-14 age/sex composition; Primary Census Abstract for population, sex, SC/ST and work-status indicators.
+- **Technical Group / National Commission on Population, Population Projections 2011–2036** — projected Kerala population by sex, including the 2026 projection of about 36.26 million persons and 17.42 million males as of 1 October 2026.
+- **MoSPI / PLFS** — latest labour-market and earnings framework. PLFS moved to a revised calendar-year annual reporting system from 2025; the calculator uses the latest published indicators where Kerala-level breakdowns are available and retains modelled factors where the required intersection is unavailable.
+- **NFHS-5, 2019–21** — Kerala anthropometry, household characteristics and health-related indicators. A newer fully published Kerala NFHS cross-tab is not substituted merely because a newer survey round is being conducted.
+- **MoSPI Household Consumption Expenditure Survey 2023–24** — latest published household consumption and durable-goods framework used as supporting socio-economic context, not as a direct individual-income measure.
+- **Kerala Department of Economics & Statistics / Kerala Economic Review** — state-level socio-economic and labour-market context.
 
-The total male population base used for count calculations is **~1.1 crore men (11,000,000)**, representing Kerala men aged 20–70 based on 2021 census projections.
+The calculator does **not** claim an official number of men actively available for marriage, an official "shortest/tallest wedding groom" registry, an exact individual wealth intersection, or an exact live matrimonial-market population. Those dimensions are modelled where necessary.
+
+The 2026 population projection is a demographic base, not a live dating or matrimonial database.
 
 ---
 
 ## ⚙️ How the Calculation Works
 
-Understanding the math behind the result helps you interpret it honestly.
+**Within OR-based preference sections**, selecting several acceptable alternatives expands the accepted pool. For example, selecting multiple employment types means any of those employment types is acceptable.
 
-**Within each preference section, the logic is OR** — meaning the filter passes if the man meets *any* of the selected options. If you tick "25–29 years" and "30–34 years", the calculator adds those percentages together (16% + 14% = 30%), because you'd accept either. This is the *union* of those groups.
+**Across preference sections, the logic is AND** — age, height, education, income, employment, religion, body type, marital status, location, assets and lifestyle conditions are combined into one modelled intersection.
 
-**Across preference sections, the logic is AND** — meaning every condition must be satisfied simultaneously. A man must fit your age range *and* your height range *and* your income bracket *and* so on. This is implemented by multiplying all the factors together. This is why the final percentage can become very small very quickly — each AND condition is a multiplicative narrowing of the pool.
+**Lifestyle and asset filters are AND-based**. Selecting Non-Smoker and Non-Drinker therefore applies both restrictions.
 
-**Lifestyle and Asset filters are always AND within their own group** — since you're requiring a man to be both a non-smoker *and* a non-drinker (for example), not one or the other. Each ticked lifestyle or asset filter multiplies independently.
+**Age** uses the Kerala demographic base and a transparent model calibration because the current official projection does not publish a complete 2026 Kerala male 21–70 cross-tab in the exact calculator bands.
 
-**The Exclude Obese toggle** applies a further `×0.77` multiplier to the body type result, reflecting that approximately 23% of Kerala men fall into the obese BMI category per NFHS-5.
+**Height** is a modelled Kerala male-height envelope. The Census does not publish a male-height distribution, and there is no authoritative government registry of the shortest or tallest wedding groom. The range is therefore an interface envelope, not an official groom-record statistic.
 
-A simplified version of the formula looks like this:
+**Income** uses annual personal-income thresholds. Survey-based tiers are separated from extreme scarcity tiers beyond ordinary PLFS coverage.
 
-```
+A simplified screening formula is:
+
+```text
 Final % = Age% × Height% × Education% × Income% × Employment%
-        × Religion% × BodyType% × Marital% × Location%
-        × (Lifestyle filters multiplied) × (Asset filters multiplied)
+        × Religion% × Body% × Marital% × Location%
+        × Financial/Asset factors × Lifestyle factors
 ```
+
+The multiplication assumes sufficient independence between characteristics for a screening model. Real-world characteristics are correlated, so the output is an estimate, not an exact Census intersection.
 
 ---
 
@@ -66,16 +81,16 @@ Final % = Age% × Height% × Education% × Income% × Employment%
 | Cans | Match % Range | Label |
 |------|--------------|-------|
 | 10/10 | > 0% to ≤ 0.01% | Single Origin Mythic Blend 🦄 |
-| 9/10  | > 0.01% to ≤ 0.1% | Collector's Edition 🏛 |
-| 8/10  | > 0.1% to ≤ 0.5%  | Rare Reserve 💎 |
-| 7/10  | > 0.5% to ≤ 1%    | Small Batch Import 🚢 |
-| 6/10  | > 1% to ≤ 2%      | Limited Batch 📦 |
-| 5/10  | > 2% to ≤ 5%      | Specialty Store 🏬 |
-| 4/10  | > 5% to ≤ 10%     | Premium Aisle 🌟 |
-| 3/10  | > 10% to ≤ 20%    | Decent Brand 🥫 |
-| 2/10  | > 20% to ≤ 50%    | Standard Shelf Stock 🏪 |
-| 1/10  | > 50%             | Bulk Bin Basics 🛒 |
-| 0/10  | Exactly 0%        | Out of Stock — Permanently 😿 |
+| 9/10 | > 0.01% to ≤ 0.1% | Collector's Edition 🏛 |
+| 8/10 | > 0.1% to ≤ 0.5% | Rare Reserve 💎 |
+| 7/10 | > 0.5% to ≤ 1% | Small Batch Import 🚢 |
+| 6/10 | > 1% to ≤ 2% | Limited Batch 📦 |
+| 5/10 | > 2% to ≤ 5% | Specialty Store 🏬 |
+| 4/10 | > 5% to ≤ 10% | Premium Aisle 🌟 |
+| 3/10 | > 10% to ≤ 20% | Decent Brand 🥫 |
+| 2/10 | > 20% to ≤ 50% | Standard Shelf Stock 🏪 |
+| 1/10 | > 50% | Bulk Bin Basics 🛒 |
+| 0/10 | Exactly 0% | Out of Stock — Permanently 😿 |
 
 *More cans = scarcer man · Fewer cans = more common*
 
@@ -83,15 +98,26 @@ Final % = Age% × Height% × Education% × Income% × Employment%
 
 ## ⚠️ Disclaimer
 
-This calculator is for **educational and self-reflection purposes only**. Real relationships involve many factors that demographics and statistics cannot capture — personality, chemistry, timing, values, and circumstance among them. The goal is to provide perspective on statistical realities, not to prescribe who you should or shouldn't date. All figures are approximations derived from government survey data and may not perfectly represent every individual's situation.
+This calculator is for **educational and self-reflection purposes only**. Real relationships involve personality, chemistry, timing, values, family circumstances, geography, attraction and individual choice that demographic statistics cannot capture.
+
+The result is a **modelled demographic scarcity estimate**. It is not a live dating-market population and does not measure willingness to marry, compatibility, attraction, availability or family approval. Where an official cross-tabulation is unavailable, the calculator labels the relevant factor as modelled rather than inventing a government statistic.
 
 ---
 
 ## 🎙️ About The Macho Pod
 
-**The Macho Pod** (`@themachopodml`) is a podcast and content platform based in Malappuram, Kerala. This calculator was built as an educational tool discussed on the show.
+**The Macho Pod** (`@themachopodml`) is a podcast and content platform based in Kerala, India. The FemDelCalc project is designed as an educational statistical tool and discussion resource for the show.
+
+### 🧮 In FemDelCalc
+
+- 🧮 [KL FemDelCalc](https://themachopodml.github.io/Female-Delusion-Calculator-Kerala) — Kerala demographic scarcity calculator
+- 🧮 [IN FemDelCalc](https://themachopodml.github.io/Female-Delusion-Calculator-India) — India demographic scarcity calculator
+
+### 📣 Connect with The Macho Pod
 
 - 💬 [Send Videos to React](https://t.me/themachopodchat)
+- 🎙️ [Exclusive Uncensored Contents](https://rumble.com/c/c-7911504)
+- 📸 [DM reels for Reaction, Opinion](https://www.instagram.com/themachopodml/)
 - 🎙️ [Telegram: @themachopodml](https://t.me/themachopodml)
 - ▶️ [YouTube: @themachopodml](https://www.youtube.com/@themachopodml)
 - 🌐 [Live Calculator](https://themachopodml.github.io/Female-Delusion-Calculator-Kerala)
